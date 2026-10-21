@@ -96,6 +96,19 @@ If you don't have Docker, you need to have a PostgreSQL instance running locally
 
 ## CMS Seeding & Default Admin
 
+### Open Play Dubai CMS page
+
+With PostgreSQL running and `.env` containing a valid `DATABASE_URL`, from the backend directory run:
+
+```bash
+npx prisma db push
+npm run db:seed:open-play-dubai
+```
+
+This adds the `open-play-dubai` page and any missing sections without changing existing CMS pages, previously edited sections, or edited SEO fields. The normal `npx prisma db seed` also includes this page, but the dedicated command is preferable on a database with existing CMS edits because other page seeds can update their content. No schema migration is needed: this page uses the existing `CmsPage` and `CmsSection` tables.
+
+After starting the backend (`npm run start:dev`), check `GET http://localhost:3000/cms/pages/open-play-dubai` (or the configured `PORT`). Section keys are `hero`, `intro`, `steps`, `partners`, `neighbourhoods`, `circle`, and `cta`; each section's editable fields live in its JSON `content`. SEO fields `metaTitle` and `metaDescription` live on the page and are editable via the existing `PUT /cms/pages/open-play-dubai/seo` admin endpoint. Section edits use `PUT /cms/sections/:id` with `{ "content": { ... } }` and an admin bearer token.
+
 When you run `npx prisma db seed`, the following happens:
 - A default admin is created: `admin@example.com` / `admin123`
 - Default content is populated for the **Home**, **About Mahjong**, and **What You Receive** pages.
