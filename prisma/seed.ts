@@ -15,6 +15,7 @@ import { seedPlaydaysPage } from './seeds/playdays.seed';
 import { seedTermsAndConditionsPage } from './seeds/terms-and-conditions.seed';
 import { seedFastTrackSplitPages } from './seeds/fast-track-split.seed';
 import { seedOpenPlayDubaiPage } from './seeds/open-play-dubai.seed';
+import { seedBlogPage } from './seeds/blog.seed';
 
 const prisma = new PrismaClient();
 
@@ -64,6 +65,7 @@ async function main() {
   await seedTermsAndConditionsPage(prisma);
   await seedFastTrackSplitPages(prisma);
   await seedOpenPlayDubaiPage(prisma);
+  await seedBlogPage(prisma);
 
   console.log('✅ Seeding Completed Successfully!');
 }
