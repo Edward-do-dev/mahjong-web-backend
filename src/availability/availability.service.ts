@@ -287,30 +287,19 @@ export class AvailabilityService {
           const shiftStartMins = timeToMins(shift.startTimeStr);
           const shiftEndMins = timeToMins(shift.endTimeStr);
 
-          // 1. Check if another location or different session slot conflicts with this slot
+          // 1. Check if another location conflicts with this slot (with 60-minute travel buffer)
           // - Different Location: applies 60-minute travel buffer [bStart - 60, bEnd + 60]
-          // - Same Location: NO travel buffer needed; allows consecutive/adjacent slots, only blocks direct overlaps
+          // - Same Location: Organizer/venue hosts multiple tables concurrently, so slots never block each other
           const isBlockedByConflict = dayAllBookings.some((b) => {
             if (!b.startTime || !b.endTime) return false;
+            if (b.locationId === locationId) return false; // Same location: allow overlapping & concurrent slots
 
             const bStart = timeToMins(b.startTime);
             const bEnd = timeToMins(b.endTime);
-            const isDifferentLocation = b.locationId !== locationId;
-
-            if (isDifferentLocation) {
-              // Different location: Organizer needs 60 mins to travel between venues
-              const blockedWindowStart = bStart - 60;
-              const blockedWindowEnd = bEnd + 60;
-              return shiftStartMins < blockedWindowEnd && shiftEndMins > blockedWindowStart;
-            } else {
-              // Same location: Organizer is already at this venue, no travel time needed
-              // Exact same time slot does not block (will reduce remaining capacity below)
-              if (b.startTime === shift.startTimeStr && b.endTime === shift.endTimeStr) {
-                return false;
-              }
-              // Only block if there is a direct time overlap
-              return Math.max(shiftStartMins, bStart) < Math.min(shiftEndMins, bEnd);
-            }
+            // Different location: Organizer needs 60 mins to travel between venues
+            const blockedWindowStart = bStart - 60;
+            const blockedWindowEnd = bEnd + 60;
+            return shiftStartMins < blockedWindowEnd && shiftEndMins > blockedWindowStart;
           });
 
           let remaining = 0;

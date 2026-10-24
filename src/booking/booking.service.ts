@@ -200,11 +200,11 @@ export class BookingService {
           include: { session: true }
         });
 
-        // 1. Check if another location or a different slot overlaps with 1-hour travel buffer
+        // 1. Conflict check: Only bookings at a DIFFERENT location block this slot (with 60-min travel buffer)
+        // At the SAME location, multiple/overlapping slots can run concurrently and manage capacity independently
         const conflict = dayBookings.some(b => {
           if (!b.startTime || !b.endTime) return false;
-          const isDifferentSlot = b.locationId !== locationId || b.startTime !== data.startTime || b.endTime !== data.endTime;
-          if (!isDifferentSlot) return false;
+          if (b.locationId === locationId) return false; // Same location does not block
 
           const bStart = timeToMins(b.startTime);
           const bEnd = timeToMins(b.endTime);
